@@ -1,4 +1,4 @@
-import * as Earthstar from "../../stone-soup/mod.ts";
+import * as Earthstar from "../../earthstar/mod.ts";
 import * as Rpc from "../../earthstar-streaming-rpc/mod.ts";
 import allowList from "../allow_list.json" assert { type: "json" };
 import classicHandler from "./classic-handler.ts";
@@ -18,13 +18,13 @@ const serverSyncer = new Earthstar.Syncer(
 
 for (const allowedAddress of allowList) {
   // TODO: Replace with Sqlite storage once merged.
-  const storage = new Earthstar.StorageAsync(
+  const storage = new Earthstar.Replica(
     allowedAddress,
     Earthstar.FormatValidatorEs4,
-    new Earthstar.StorageDriverAsyncMemory(allowedAddress),
+    new Earthstar.ReplicaDriverMemory(allowedAddress),
   );
 
-  peer.addStorage(storage);
+  peer.addReplica(storage);
 }
 
 export default function handler(req: Request): Promise<Response> {
