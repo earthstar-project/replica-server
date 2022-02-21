@@ -1,4 +1,4 @@
-import * as Earthstar from "../../stone-soup/mod.ts";
+import * as Earthstar from "../../earthstar/mod.ts";
 
 export default async function classicHandler(
   req: Request,
