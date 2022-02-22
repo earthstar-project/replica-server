@@ -8,7 +8,7 @@ const keypairA = await Earthstar.Crypto.generateAuthorKeypair(
   "suzy",
 ) as Earthstar.AuthorKeypair;
 const keypairB = await Earthstar.Crypto.generateAuthorKeypair(
-  "fred",
+  "lani",
 ) as Earthstar.AuthorKeypair;
 
 // Create peers
