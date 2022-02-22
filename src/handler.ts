@@ -1,18 +1,17 @@
-import * as Earthstar from "../../earthstar/mod.ts";
-import * as Rpc from "../../earthstar-streaming-rpc/mod.ts";
+import * as Earthstar from "https://deno.land/x/earthstar@v7.1.0/mod.ts";
+import * as Rpc from "https://deno.land/x/earthstar_streaming_rpc@3.2.3/mod.ts";
 import allowList from "../allow_list.json" assert { type: "json" };
 import classicHandler from "./classic-handler.ts";
 
 const peer = new Earthstar.Peer();
 
-// TODO: Replace with websocket server when that's merged.
 const serverSyncer = new Earthstar.Syncer(
   peer,
   (methods) =>
-    new Rpc.TransportHttpServer({
-      path: "/earthstar-api/v2/",
+    new Rpc.TransportWebsocketServer({
       deviceId: peer.peerId,
       methods,
+      url: "",
     }),
 );
 
@@ -21,7 +20,11 @@ for (const allowedAddress of allowList) {
   const storage = new Earthstar.Replica(
     allowedAddress,
     Earthstar.FormatValidatorEs4,
-    new Earthstar.ReplicaDriverMemory(allowedAddress),
+    new Earthstar.ReplicaDriverSqlite({
+      filename: `./data/${allowedAddress}.sql`,
+      mode: "create-or-open",
+      share: allowedAddress,
+    }),
   );
 
   peer.addReplica(storage);
@@ -34,5 +37,5 @@ export default function handler(req: Request): Promise<Response> {
     return classicHandler(req, peer);
   }
 
-  return serverSyncer.transport.handler(req);
+  return serverSyncer.transport.reqHandler(req);
 }

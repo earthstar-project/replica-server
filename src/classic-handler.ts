@@ -50,7 +50,6 @@ export default async function classicHandler(
       });
     }
 
-    // TODO: Probably need to strip localIndex here
     const docs = await storage.getAllDocs();
 
     return new Response(JSON.stringify(docs), {

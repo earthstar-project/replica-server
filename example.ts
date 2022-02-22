@@ -19,7 +19,6 @@ console.group("Setting up peers...");
 for (const allowedAddress of allowList) {
   console.group(`Setting up ${allowedAddress}...`);
 
-  // TODO: Replace with Sqlite storage once merged.
   const storage = new Earthstar.StorageAsync(
     allowedAddress,
     Earthstar.FormatValidatorEs4,
@@ -150,8 +149,8 @@ const server = serve(handler, {
 
 console.log(`%cStarted server.`, "color: green");
 
-peer.sync("http://localhost:9091/earthstar-api/v2");
-peer2.sync("http://localhost:9091/earthstar-api/v2");
+peer.sync("ws://localhost:9091/earthstar-api/v2");
+peer2.sync("ws://localhost:9091/earthstar-api/v2");
 
 console.log("%cBegan syncing peers...", "color: green");
 

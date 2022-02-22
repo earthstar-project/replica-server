@@ -1,3 +1,5 @@
+.PHONY: server example
+
 server:
 	deno run --allow-net --allow-env --no-check server.ts
 
