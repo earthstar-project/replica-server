@@ -23,6 +23,7 @@ export default async function classicHandler(
       return new Response("Not found", {
         headers: {
           status: "404",
+          "Access-Control-Allow-Origin": "*",
         },
       });
     }
@@ -33,6 +34,7 @@ export default async function classicHandler(
     return new Response(JSON.stringify(paths), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin": "*",
       },
     });
   }
@@ -46,6 +48,7 @@ export default async function classicHandler(
       return new Response("Not found", {
         headers: {
           status: "404",
+          "Access-Control-Allow-Origin": "*",
         },
       });
     }
@@ -55,6 +58,7 @@ export default async function classicHandler(
     return new Response(JSON.stringify(docs), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin": "*",
       },
     });
   }
@@ -68,6 +72,7 @@ export default async function classicHandler(
       return new Response("Not found", {
         headers: {
           status: "404",
+          "Access-Control-Allow-Origin": "*",
         },
       });
     }
@@ -78,6 +83,7 @@ export default async function classicHandler(
       return new Response("Bad request", {
         headers: {
           status: "400",
+          "Access-Control-Allow-Origin": "*",
         },
       });
     }
@@ -100,6 +106,7 @@ export default async function classicHandler(
     return new Response(JSON.stringify(result), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin": "*",
       },
     });
   }
@@ -107,6 +114,7 @@ export default async function classicHandler(
   return new Response("Not found", {
     headers: {
       status: "404",
+      "Access-Control-Allow-Origin": "*",
     },
   });
 }
