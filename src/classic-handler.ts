@@ -17,7 +17,7 @@ export default async function classicHandler(
   if (allPathsResult && req.method === "GET") {
     const shareAddress = allPathsResult.pathname.groups["workspace"];
 
-    const storage = peer.getStorage(shareAddress);
+    const storage = peer.getReplica(shareAddress);
 
     if (!storage) {
       return new Response("Not found", {
@@ -40,7 +40,7 @@ export default async function classicHandler(
   if (allDocsResult && req.method === "GET") {
     const shareAddress = allDocsResult.pathname.groups["workspace"];
 
-    const storage = peer.getStorage(shareAddress);
+    const storage = peer.getReplica(shareAddress);
 
     if (!storage) {
       return new Response("Not found", {
@@ -62,7 +62,7 @@ export default async function classicHandler(
   if (allDocsResult && req.method === "POST") {
     const shareAddress = allDocsResult.pathname.groups["workspace"];
 
-    const storage = peer.getStorage(shareAddress);
+    const storage = peer.getReplica(shareAddress);
 
     if (!storage) {
       return new Response("Not found", {

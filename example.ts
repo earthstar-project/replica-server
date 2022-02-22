@@ -1,4 +1,4 @@
-import * as Earthstar from "../stone-soup/mod.ts";
+import { Earthstar } from "./deps.ts";
 import * as EarthstarClassic from "https://esm.sh/earthstar?dts";
 import { serve } from "https://deno.land/std@0.125.0/http/server.ts";
 import handler from "./src/handler.ts";
@@ -19,20 +19,20 @@ console.group("Setting up peers...");
 for (const allowedAddress of allowList) {
   console.group(`Setting up ${allowedAddress}...`);
 
-  const storage = new Earthstar.StorageAsync(
+  const storage = new Earthstar.Replica(
     allowedAddress,
     Earthstar.FormatValidatorEs4,
-    new Earthstar.StorageDriverAsyncMemory(allowedAddress),
+    new Earthstar.ReplicaDriverMemory(allowedAddress),
   );
 
-  const storage2 = new Earthstar.StorageAsync(
+  const storage2 = new Earthstar.Replica(
     allowedAddress,
     Earthstar.FormatValidatorEs4,
-    new Earthstar.StorageDriverAsyncMemory(allowedAddress),
+    new Earthstar.ReplicaDriverMemory(allowedAddress),
   );
 
-  peer.addStorage(storage);
-  peer2.addStorage(storage2);
+  peer.addReplica(storage);
+  peer2.addReplica(storage2);
 
   console.log(`Added to local peers.`);
 
@@ -164,12 +164,12 @@ for (const storage of classicStorages) {
 console.log("%cBegan syncing classic peers...", "color: green");
 
 function checkAllAreSynced() {
-  const allStoragesSynced = peer.storages().every(async (storage) => {
+  const allStoragesSynced = peer.replicas().every(async (storage) => {
     const docs = await storage.getLatestDocs();
     return docs.length === 4;
   });
 
-  const allStoragesSynced2 = peer2.storages().every(async (storage) => {
+  const allStoragesSynced2 = peer2.replicas().every(async (storage) => {
     const docs = await storage.getLatestDocs();
     return docs.length === 4;
   });

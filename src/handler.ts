@@ -1,5 +1,4 @@
-import * as Earthstar from "https://deno.land/x/earthstar@v7.1.0/mod.ts";
-import * as Rpc from "https://deno.land/x/earthstar_streaming_rpc@3.2.3/mod.ts";
+import { Earthstar, Rpc } from "../deps.ts";
 import allowList from "../allow_list.json" assert { type: "json" };
 import classicHandler from "./classic-handler.ts";
 
