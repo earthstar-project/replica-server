@@ -1,5 +1,4 @@
 import { Earthstar, Rpc } from "../deps.ts";
-import allowList from "../allow_list.json" assert { type: "json" };
 import classicHandler from "./classic-handler.ts";
 
 const peer = new Earthstar.Peer();
@@ -13,6 +12,9 @@ const serverSyncer = new Earthstar.Syncer(
       url: "",
     }),
 );
+
+const allowListRaw = await Deno.readTextFile("./allow_list.json");
+const allowList = JSON.parse(allowListRaw) as string[];
 
 for (const allowedAddress of allowList) {
   // TODO: Replace with Sqlite storage once merged.
