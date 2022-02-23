@@ -4,7 +4,10 @@ import handler from "./src/handler.ts";
 
 const flags = parse(Deno.args, {
   string: ["port", "hostname"],
-  default: { port: "8080", hostname: "0.0.0.0" },
+  default: {
+    port: "8080",
+    hostname: "0.0.0.0",
+  },
 });
 
 console.log(`Started server on ${flags.hostname}:${flags.port}`);

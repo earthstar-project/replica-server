@@ -1,5 +1,6 @@
 import { Earthstar, Rpc } from "../deps.ts";
 import classicHandler from "./classic-handler.ts";
+import { parse } from "https://deno.land/std@0.119.0/flags/mod.ts";
 
 const peer = new Earthstar.Peer();
 
@@ -13,7 +14,14 @@ const serverSyncer = new Earthstar.Syncer(
     }),
 );
 
-const allowListRaw = await Deno.readTextFile("./allow_list.json");
+const flags = parse(Deno.args, {
+  string: ["allowList"],
+  default: {
+    allowList: "./allow_list.json",
+  },
+});
+
+const allowListRaw = await Deno.readTextFile(flags.allowList);
 const allowList = JSON.parse(allowListRaw) as string[];
 
 for (const allowedAddress of allowList) {
