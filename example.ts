@@ -149,8 +149,8 @@ const server = serve(handler, {
 
 console.log(`%cStarted server.`, "color: green");
 
-peer.sync("ws://localhost:9091/earthstar-api/v2");
-peer2.sync("ws://localhost:9091/earthstar-api/v2");
+peer.sync("ws://localhost:9091");
+peer2.sync("ws://localhost:9091");
 
 console.log("%cBegan syncing peers...", "color: green");
 
@@ -163,19 +163,33 @@ for (const storage of classicStorages) {
 
 console.log("%cBegan syncing classic peers...", "color: green");
 
+const replicas = peer.replicas();
+
+await new Promise((resolve) => {
+  setTimeout(resolve, 1000);
+});
+
+for (const replica of replicas) {
+  await replica.set(keypairA, {
+    content: "Test",
+    path: "/after.txt",
+    format: "es.4",
+  });
+}
+
 function checkAllAreSynced() {
   const allStoragesSynced = peer.replicas().every(async (storage) => {
     const docs = await storage.getLatestDocs();
-    return docs.length === 4;
+    return docs.length === 5;
   });
 
   const allStoragesSynced2 = peer2.replicas().every(async (storage) => {
     const docs = await storage.getLatestDocs();
-    return docs.length === 4;
+    return docs.length === 5;
   });
 
   const allClassicStoragesSynced = classicStorages.every((storage) => {
-    return storage.documents().length === 4;
+    return storage.documents().length === 5;
   });
 
   if (allStoragesSynced && allStoragesSynced2 && allClassicStoragesSynced) {
