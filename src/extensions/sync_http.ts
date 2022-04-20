@@ -1,10 +1,14 @@
 import { Earthstar, Rpc } from "../../deps.ts";
 import { IReplicaServerExtension } from "./extension.ts";
 
+/**
+ * - `path`: The path to accept HTTP sync requests from, e.g. `/earthstar-api/v2`. Make sure to set this if you're using other extensions which handle requests, as by default this is set to `/`.
+ */
 interface ExtensionSyncOpts {
   path?: string;
 }
 
+/** An extension which enables synchronisation over HTTP. */
 export class ExtensionSyncHttp implements IReplicaServerExtension {
   private syncer: Earthstar.Syncer<Rpc.TransportHttpServer<any>> | null = null;
   private path = "/";

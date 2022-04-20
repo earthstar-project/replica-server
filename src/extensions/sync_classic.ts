@@ -6,10 +6,14 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
 };
 
+/**
+ * - `path`: The path at which syncing should take place. Will default to `/earthstar-api/v1/` if not given.
+ */
 interface ExtensionSyncClassicOpts {
   path?: string;
 }
 
+/** An extension which enables synchronisation with pre-v7 Earthstar peers. Useful if you want to migrate Earthstar data from older clients to new one, or if you just want to keep using pre-v7 Earthstar clients. */
 export class ExtensionSyncClassic implements IReplicaServerExtension {
   private peer: Earthstar.Peer | null = null;
   private path = "/earthstar-api/v1/";

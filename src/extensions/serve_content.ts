@@ -3,13 +3,20 @@ import { IReplicaServerExtension } from "./extension.ts";
 import { decode } from "https://deno.land/std@0.126.0/encoding/base64.ts";
 import { micromark } from "https://esm.sh/micromark";
 
+/**
+ * - `sourceShare`: The share to use as the source of documents. Must have been created by another extension.
+ * - `path`: An optional path prefix for requests. E.g. `/stuff` means a call to `/stuff/blog.md` would fetch `/blog.md` from the replica.
+ * - `indexPath`: A fallback path to use when none is provided. Useful for landing pages.
+ * - `allowOrigins`: A list of origins allowed by CORS, if you want other sites to be able to request content from your replica server.
+ */
 export interface ExtensionServeContentOpts {
-  path?: string;
   sourceShare: string;
+  path?: string;
   indexPath?: string;
   allowedOrigins?: string[];
 }
 
+/** An extension for exposing the contents of shares, so that you can request documents by their path and have them served over HTTP. Can be used to create wikis, websites, image galleries, and more. */
 export class ExtensionServeContent implements IReplicaServerExtension {
   private peer: Earthstar.Peer | null = null;
   private path = "/";

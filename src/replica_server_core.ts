@@ -1,6 +1,7 @@
 import { Earthstar } from "../deps.ts";
 import { IReplicaServerExtension } from "./extensions/extension.ts";
 
+/** The core replica server logic. Combine this with a HTTP framework to create a fully-fledged replica server. */
 export class ReplicaServerCore {
   private extensions: IReplicaServerExtension[];
   private peer: Earthstar.Peer;
