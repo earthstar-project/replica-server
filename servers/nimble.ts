@@ -7,7 +7,7 @@ import {
 import { Earthstar } from "../deps.ts";
 import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/replica/replica-driver-sqlite.deno.ts";
 
-/** A replica server with a share allow list and HTTP syncing.
+/** A ready-made replica server with a share allow list and HTTP syncing.
  * - It will look for the allow list at `./allow_list.json`
  * - HTTP sync endpoint is at `<hostname>/earthstar-api/v2`
  */

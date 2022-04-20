@@ -11,8 +11,6 @@ export type ReplicaServerOpts = {
  * An extensible replica server able to synchronise with other peers.
  *
  * A replica server's functionality can be extended using extensions of type `IReplicaServerExtension`.
- *
- * Use the replica server with your HTTP framework of choice using the `getHandler` method.
  */
 export class ReplicaServer {
   private core: ReplicaServerCore;
