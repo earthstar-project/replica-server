@@ -1,8 +1,21 @@
 # Earthstar Replica Server
 
 A replica server is an always-online peer which you can use to synchronise your
-shares with far away friends. They're undiscoverable and only synchronise with
-peers who already know your shares' addresses.
+Earthstar shares with far away friends. They're undiscoverable and only
+synchronise with peers who already know your shares' addresses.
+
+- Outline (extensions, preconfigured versions)
+
+- Remix with Glitch
+- Instructions for Fly + Dockerfile
+- Running off your own machine
+
+- Prebuilt servers
+
+- Extensions
+- Developing extensions
+
+## Old
 
 Putting one of these online requires a bit of technical know-how, as you will
 need to know how to run the server and optionally publicly expose it to the web.

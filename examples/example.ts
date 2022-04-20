@@ -1,8 +1,7 @@
-import { Earthstar } from "./deps.ts";
+import { Earthstar } from "../deps.ts";
 import * as EarthstarClassic from "https://esm.sh/earthstar?dts";
-import { serve } from "https://deno.land/std@0.125.0/http/server.ts";
-import handler from "./src/handler.ts";
-import allowList from "./allow_list.json" assert { type: "json" };
+import { HeritageServer } from "../servers/heritage.ts";
+import allowList from "../allow_list.json" assert { type: "json" };
 
 const keypairA = await Earthstar.Crypto.generateAuthorKeypair(
   "suzy",
@@ -143,9 +142,7 @@ console.groupEnd();
 
 // Let's sync!
 
-const server = serve(handler, {
-  port: 9091,
-});
+const server = new HeritageServer({ port: 9091 });
 
 console.log(`%cStarted server.`, "color: green");
 

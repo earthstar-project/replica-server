@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "example": "deno run --allow-all --no-check examples/example.ts",
+    "zippy": "deno run --allow-all --no-check examples/zippy_server.ts",
+    "nimble": "deno run --allow-all --no-check examples/nimble_server.ts",
+    "showcase": "deno run --allow-all --no-check examples/showcase_server.ts",
+    "glitch": "node examples/glitch.mjs",
+    "npm": "deno run --allow-all scripts/build_npm.ts"
+  }
+}
