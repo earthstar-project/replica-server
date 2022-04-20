@@ -11,7 +11,10 @@ const flags = parse(Deno.args, {
 
 console.log(`Started showcase server on ${flags.hostname}:${flags.port}`);
 
-const server = new ShowcaseServer("+welcome.a123", {
+const server = new ShowcaseServer({
+  sourceShare: "+welcome.a123",
+  indexPath: "/wiki.md",
+}, {
   hostname: flags.hostname,
   port: flags.port,
 });

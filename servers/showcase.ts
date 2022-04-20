@@ -1,5 +1,6 @@
 import {
   ExtensionServeContent,
+  ExtensionServeContentOpts,
   ExtensionShareAllowListJson,
   ExtensionSyncWebsocket,
   ReplicaServer,
@@ -12,7 +13,10 @@ import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/re
 export class ShowcaseServer {
   private server: ReplicaServer;
 
-  constructor(sourceShare: Earthstar.ShareAddress, opts: ReplicaServerOpts) {
+  constructor(
+    serveOpts: ExtensionServeContentOpts,
+    opts: ReplicaServerOpts,
+  ) {
     this.server = new ReplicaServer([
       new ExtensionShareAllowListJson({
         allowListPath: "./allow_list.json",
@@ -28,11 +32,10 @@ export class ShowcaseServer {
           );
         },
       }),
-      new ExtensionSyncWebsocket({}),
-      new ExtensionServeContent({
-        path: "/",
-        sourceShare,
+      new ExtensionSyncWebsocket({
+        path: "/earthstar-api/v2",
       }),
+      new ExtensionServeContent(serveOpts),
     ], opts);
   }
 

@@ -1,10 +1,13 @@
 import { Earthstar } from "../../deps.ts";
 import { IReplicaServerExtension } from "./extension.ts";
 import { decode } from "https://deno.land/std@0.126.0/encoding/base64.ts";
+import { micromark } from "https://esm.sh/micromark";
 
-interface ExtensionServeContentOpts {
+export interface ExtensionServeContentOpts {
   path?: string;
   sourceShare: string;
+  indexPath?: string;
+  allowedOrigins?: string[];
 }
 
 export class ExtensionServeContent implements IReplicaServerExtension {
@@ -12,6 +15,8 @@ export class ExtensionServeContent implements IReplicaServerExtension {
   private path = "/";
   private replica: Earthstar.IReplica | null = null;
   private sourceShare: string;
+  private indexPath: string | undefined;
+  private allowedOrigins: string[] = [];
 
   constructor(opts: ExtensionServeContentOpts) {
     if (opts.path) {
@@ -19,6 +24,11 @@ export class ExtensionServeContent implements IReplicaServerExtension {
     }
 
     this.sourceShare = opts.sourceShare;
+    this.indexPath = opts.indexPath;
+
+    if (opts.allowedOrigins) {
+      this.allowedOrigins = opts.allowedOrigins;
+    }
   }
 
   register(peer: Earthstar.Peer) {
@@ -49,7 +59,28 @@ export class ExtensionServeContent implements IReplicaServerExtension {
     if (this.replica && pathPatternResult && req.method === "GET") {
       const pathToGet = pathPatternResult.pathname.groups[0];
 
-      const maybeDocument = await this.replica.getLatestDocAtPath(pathToGet);
+      if (pathToGet === "" && this.indexPath) {
+        const doc = await this.replica.getLatestDocAtPath(this.indexPath);
+
+        if (doc) {
+          return new Response(
+            contentToUInt8Array(doc.path, doc.content),
+            {
+              headers: {
+                status: "200",
+                "content-type": getContentType(doc.path),
+                "access-control-allow-origin": `localhost ${
+                  this.allowedOrigins.join(", ")
+                }`,
+              },
+            },
+          );
+        }
+      }
+
+      const maybeDocument = await this.replica.getLatestDocAtPath(
+        `/${pathToGet}`,
+      );
 
       if (!maybeDocument) {
         return new Response("Not found", {
@@ -65,7 +96,9 @@ export class ExtensionServeContent implements IReplicaServerExtension {
           headers: {
             status: "200",
             "content-type": getContentType(maybeDocument.path),
-            "access-control-allow-origin": "https://gwil.garden, localhost",
+            "access-control-allow-origin": `localhost ${
+              this.allowedOrigins.join(", ")
+            }`,
           },
         },
       );
@@ -81,6 +114,10 @@ const base64Extensions = ["jpg", "jpeg", "png", "gif", "svg"];
 
 function contentToUInt8Array(path: string, content: string) {
   const extension = path.split(".").pop();
+
+  if (extension === "md") {
+    return textEncoder.encode(micromark(content));
+  }
 
   if (extension && base64Extensions.includes(extension)) {
     return decode(content);
@@ -98,6 +135,7 @@ function getContentType(path: string): string {
     case "json":
       return "application/json; charset=UTF-8";
     case "html":
+    case "md":
       return "text/html; charset=UTF-8";
     case "jpg":
     case "jpeg":
