@@ -42,7 +42,7 @@ export class ReplicaServer {
       }
 
       // Need the hostname here so the URL plays nice with Node's URL class.
-      const url = `http://0.0.0.0/${req.url}`;
+      const url = `http://0.0.0.0${req.url}`;
 
       const request = new Request(url, {
         method: req.method,
