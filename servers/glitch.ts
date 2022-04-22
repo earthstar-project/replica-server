@@ -24,7 +24,7 @@ export class GlitchServer {
             Earthstar.FormatValidatorEs4,
             new ReplicaDriverSqlite({
               share: shareAddress,
-              filename: `.data/shares/${shareAddress}.sql`,
+              filename: `.data/${shareAddress}.sql`,
               mode: "create-or-open",
             }),
           );
