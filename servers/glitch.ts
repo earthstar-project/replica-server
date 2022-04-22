@@ -17,14 +17,14 @@ export class GlitchServer {
   constructor(opts: ReplicaServerOpts) {
     this.server = new ReplicaServer([
       new ExtensionKnownShares({
-        knownSharesPath: "./data/known_shares.json",
+        knownSharesPath: ".data/known_shares.json",
         onCreateReplica: (shareAddress) => {
           return new Earthstar.Replica(
             shareAddress,
             Earthstar.FormatValidatorEs4,
             new ReplicaDriverSqlite({
               share: shareAddress,
-              filename: `./data/${shareAddress}.sql`,
+              filename: `.data/shares/${shareAddress}.sql`,
               mode: "create-or-open",
             }),
           );
