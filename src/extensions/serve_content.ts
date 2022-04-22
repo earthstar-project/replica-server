@@ -1,7 +1,7 @@
 import { Earthstar } from "../../deps.ts";
 import { IReplicaServerExtension } from "./extension.ts";
 import { decode } from "https://deno.land/std@0.126.0/encoding/base64.ts";
-import { micromark } from "https://esm.sh/micromark";
+import { micromark } from "https://esm.sh/micromark@3.0.10";
 
 /**
  * - `sourceShare`: The share to use as the source of documents. Must have been created by another extension.

@@ -68,6 +68,10 @@ await build({
         subPath: "node",
         version: "9.3.2",
       },
+    "https://esm.sh/micromark@3.0.10": {
+      name: "micromark",
+      version: "3.0.10",
+    },
   },
   compilerOptions: {
     // ES2020 for Node v14 support
