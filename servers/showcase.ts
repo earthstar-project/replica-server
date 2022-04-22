@@ -1,7 +1,7 @@
 import {
+  ExtensionKnownShares,
   ExtensionServeContent,
   ExtensionServeContentOpts,
-  ExtensionShareAllowListJson,
   ExtensionSyncWebsocket,
   ReplicaServer,
   ReplicaServerOpts,
@@ -9,8 +9,8 @@ import {
 import { Earthstar } from "../deps.ts";
 import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/replica/replica-driver-sqlite.deno.ts";
 
-/** A ready-made replica server with a share allow list, able to serve the contents of a single share via HTTP requests. Great for building wikis, websites, and image galleries with friends.
- * - It will look for the allow list at `./allow_list.json`
+/** A ready-made replica server populated with shares from a local list, able to serve the contents of a single share via HTTP requests. Great for building wikis, websites, and image galleries with friends.
+ * - It will look for the known shares list at `./known_shares.json`
  * - Websocket sync endpoint is at `<hostname>/earthstar-api/v2`
  */
 export class ShowcaseServer {
@@ -21,8 +21,8 @@ export class ShowcaseServer {
     opts: ReplicaServerOpts,
   ) {
     this.server = new ReplicaServer([
-      new ExtensionShareAllowListJson({
-        allowListPath: "./allow_list.json",
+      new ExtensionKnownShares({
+        knownSharesPath: "./known_shares.json",
         onCreateReplica: (shareAddress) => {
           return new Earthstar.Replica(
             shareAddress,

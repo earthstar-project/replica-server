@@ -15,20 +15,19 @@ create your own extensions!
 
 This module exports a few preconfigured servers you can deploy right away.
 
-- **Glitch**: Share allowlist, HTTP sync, works on Node.
-- **Showcase**: Share allowlist, HTTP/Websocket sync, able to serve content from
-  one share through the browser.
-- **Heritage**: Share allowlist, Websocket sync, Classic Earthstar (pre-v7) sync
-  via HTTP.
-- **Zippy**: Share allowlist, Websocket sync.
-- **Nimble**: Share allowlist, HTTP sync.
+- **Glitch**: For Node environments. Known share list, HTTP sync.
+- **Showcase**: Put the fruits of your share on display. Known share list,
+  HTTP/Websocket sync, able to serve content one share through the browser.
+- **Heritage**: Backwards compatibility with older Earthstar clients and peers.
+  Known share list, Websocket sync, Classic Earthstar (pre-v7) sync. via HTTP.
+- **Nimble**: Known share list, Websocket sync.
 
 Here's an example of starting one of these on Deno:
 
 ```ts
-import { ZippyServer } from "https://deno.land/xxxxxxxxx/mod.ts";
+import { Nimble } from "https://deno.land/xxxxxxxxx/mod.ts";
 
-const server = new ZippyServer();
+const server = new NimbleServer();
 // That's it. Your replica server is running.
 ```
 
@@ -39,20 +38,19 @@ as straightforward to configure it to your liking using extensions.
 
 It's possible to configure your own replica server using extensions.
 
-Here's a replica server with websocket sync and an allow list which creates
-in-memory replicas:
+Here's a replica server pre-populated with known shares and websocket sync.
 
 ```ts
 import * as Earthstar from "https://deno.land/x/earthstar/mod.ts";
 import {
-  ExtensionShareAllowListJson,
+  ExtensionKnownShares,
   ExtensionSyncWebsocket,
   ReplicaServer,
 } from "https://deno.land/xxxxxxx/mod.ts";
 
 const server = new ReplicaServer([
-  new ExtensionShareAllowListJson({
-    allowList: "allow_list.json",
+  new ExtensionKnownShares({
+    knownSharesPath: "known_shares.json"
     onCreateReplica: (shareAddress) => {
       return new Earthstar.Replica(
         shareAddress,
@@ -66,20 +64,20 @@ const server = new ReplicaServer([
 ```
 
 The order in which you specify extensions matters, as some extensions may do
-something which another extension depends upon, e.g.
-`ExtensionShareAllowListJson` sets up replicas which `ExtensionServeContent`
-will serve content from.
+something which another extension depends upon, e.g. `ExtensionKnownShares` sets
+up replicas which `ExtensionServeContent` will serve content from.
 
 Equally, requests will fall through extensions, returning on the first match. So
 sync extensions like `ExtensionSyncHttp` should come before
 `ExtensionServeContent`, so that requests to sync aren't swallowed.
 
-### ExtensionShareAllowListJson
+### ExtensionKnownShares
 
-This extension configures which shares your replica server is allowed to
-synchronise. This protects your replica server from syncing untrusted data from
-strangers. The allow list is pulled from a JSON file on disk, and you can
-specify how the extension should create corresponding replicas for the shares.
+This extension configures which shares your replica server knows about and sync.
+Earthstar peers can only sync shares _they both know about beforehand_,
+protecting your replica server from syncing untrusted data with strangers. The
+known share list is pulled from a JSON file on disk, and you can specify how the
+extension should create corresponding replicas for the shares.
 
 ### ExtensionSyncWebsocket
 
@@ -107,8 +105,8 @@ markdown, text, images, and more.
 
 ## Developing extensions
 
-Extensions can be very simple or complex. `ExtensionShareAllowListJson` is less
-than 50 lines of code.
+Extensions can be very simple or complex. `ExtensionKnownShares` is less than 50
+lines of code.
 
 Your extension needs to implement the interface IReplicaServerExtension, which
 has two methods:

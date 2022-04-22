@@ -1,7 +1,7 @@
 import { Earthstar } from "../deps.ts";
 import * as EarthstarClassic from "https://esm.sh/earthstar?dts";
 import { HeritageServer } from "../servers/heritage.ts";
-import allowList from "../allow_list.json" assert { type: "json" };
+import sharesList from "../known_shares.json" assert { type: "json" };
 
 const keypairA = await Earthstar.Crypto.generateAuthorKeypair(
   "suzy",
@@ -15,19 +15,19 @@ const peer = new Earthstar.Peer();
 const peer2 = new Earthstar.Peer();
 
 console.group("Setting up peers...");
-for (const allowedAddress of allowList) {
-  console.group(`Setting up ${allowedAddress}...`);
+for (const knownShare of sharesList) {
+  console.group(`Setting up ${knownShare}...`);
 
   const storage = new Earthstar.Replica(
-    allowedAddress,
+    knownShare,
     Earthstar.FormatValidatorEs4,
-    new Earthstar.ReplicaDriverMemory(allowedAddress),
+    new Earthstar.ReplicaDriverMemory(knownShare),
   );
 
   const storage2 = new Earthstar.Replica(
-    allowedAddress,
+    knownShare,
     Earthstar.FormatValidatorEs4,
-    new Earthstar.ReplicaDriverMemory(allowedAddress),
+    new Earthstar.ReplicaDriverMemory(knownShare),
   );
 
   peer.addReplica(storage);
@@ -60,7 +60,7 @@ for (const allowedAddress of allowList) {
 
   qf1.bus.on((data) => {
     if (data.kind === "success") {
-      console.group(`%c${allowedAddress} 1 got doc:`, "color: purple");
+      console.group(`%c${knownShare} 1 got doc:`, "color: purple");
       console.log(data.doc.path);
       console.log(data.doc.content);
       console.groupEnd();
@@ -69,7 +69,7 @@ for (const allowedAddress of allowList) {
 
   qf2.bus.on((data) => {
     if (data.kind === "success") {
-      console.group(`%c${allowedAddress} 2 got doc:`, "color: purple");
+      console.group(`%c${knownShare} 2 got doc:`, "color: purple");
       console.log(data.doc.path);
       console.log(data.doc.content);
       console.groupEnd();
@@ -88,14 +88,14 @@ console.groupEnd();
 
 console.group("Setting up classic storages...");
 const classicStorages: EarthstarClassic.StorageMemory[] = [];
-for (const allowedAddress of allowList) {
-  console.group(`Setting up ${allowedAddress}...`);
+for (const knownShare of sharesList) {
+  console.group(`Setting up ${knownShare}...`);
   const storage = new EarthstarClassic.StorageMemory([
     EarthstarClassic.ValidatorEs4,
-  ], allowedAddress);
+  ], knownShare);
   const storage2 = new EarthstarClassic.StorageMemory([
     EarthstarClassic.ValidatorEs4,
-  ], allowedAddress);
+  ], knownShare);
 
   storage.set(keypairA, {
     content: "From classic storage 1!",
@@ -115,7 +115,7 @@ for (const allowedAddress of allowList) {
 
   storage.onWrite.subscribe((event) => {
     if (event.kind === "DOCUMENT_WRITE") {
-      console.group(`%c${allowedAddress} (Classic) got doc:`, "color: purple");
+      console.group(`%c${knownShare} (Classic) got doc:`, "color: purple");
       console.log(event.document.path);
       console.log(event.document.content);
       console.groupEnd();
@@ -125,7 +125,7 @@ for (const allowedAddress of allowList) {
   storage2.onWrite.subscribe((event) => {
     if (event.kind === "DOCUMENT_WRITE") {
       console.group(
-        `%c${allowedAddress} 2 (Classic) got doc:`,
+        `%c${knownShare} 2 (Classic) got doc:`,
         "color: purple",
       );
       console.log(event.document.path);

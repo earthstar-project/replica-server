@@ -19,7 +19,7 @@ export class ReplicaServer {
 
   /**
    * Create a new replica server with an array of extensions.
-   * @param extensions - The extensions used by the replica server. Extensions will be registered in the order you provide them in, as one extension may depend on the actions of another. For example, the `ExtensionServeContent` may rely on a replica created by `ExtensionShareAllowListJson`.
+   * @param extensions - The extensions used by the replica server. Extensions will be registered in the order you provide them in, as one extension may depend on the actions of another. For example, the `ExtensionServeContent` may rely on a replica created by `ExtensionKnownShares`.
    */
   constructor(extensions: IReplicaServerExtension[], opts?: ReplicaServerOpts) {
     this.core = new ReplicaServerCore(extensions);

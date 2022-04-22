@@ -1,5 +1,5 @@
 import {
-  ExtensionShareAllowListJson,
+  ExtensionKnownShares,
   ExtensionSyncHttp,
   ReplicaServer,
   ReplicaServerOpts,
@@ -7,8 +7,8 @@ import {
 import { Earthstar } from "../deps.ts";
 import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/replica/replica-driver-sqlite.deno.ts";
 
-/** A ready-made node replica server with a share allow list and HTTP sync.
- * - It will look for the allow list at `data/allow_list.json`,
+/** A ready-made replica server populated with shares from a local list, and HTTP sync.
+ * - It will look for the known shares list at `./known_shares.json`
  * - The sync endpoint is at `<hostname>/earthstar-api/v2`
  */
 export class GlitchServer {
@@ -16,8 +16,8 @@ export class GlitchServer {
 
   constructor(opts: ReplicaServerOpts) {
     this.server = new ReplicaServer([
-      new ExtensionShareAllowListJson({
-        allowListPath: "./data/allow_list.json",
+      new ExtensionKnownShares({
+        knownSharesPath: "./data/known_shares.json",
         onCreateReplica: (shareAddress) => {
           return new Earthstar.Replica(
             shareAddress,

@@ -1,23 +1,23 @@
 import {
-  ExtensionShareAllowListJson,
-  ExtensionSyncHttp,
+  ExtensionKnownShares,
+  ExtensionSyncWebsocket,
   ReplicaServer,
   ReplicaServerOpts,
 } from "../mod.ts";
 import { Earthstar } from "../deps.ts";
 import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/replica/replica-driver-sqlite.deno.ts";
 
-/** A ready-made replica server with a share allow list and HTTP syncing.
- * - It will look for the allow list at `./allow_list.json`
- * - HTTP sync endpoint is at `<hostname>/earthstar-api/v2`
+/** A ready-made replica server populated with shares from a local list, and Websocket syncing.
+ * - It will look for the known shares list at `./known_shares.json`
+ * - Websocket sync endpoint is at `<hostname>/earthstar-api/v2`
  */
-export class NimbleServer {
+export class ZippyServer {
   private server: ReplicaServer;
 
   constructor(opts: ReplicaServerOpts) {
     this.server = new ReplicaServer([
-      new ExtensionShareAllowListJson({
-        allowListPath: "./allow_list.json",
+      new ExtensionKnownShares({
+        knownSharesPath: "./known_shares.json",
         onCreateReplica: (shareAddress) => {
           return new Earthstar.Replica(
             shareAddress,
@@ -30,9 +30,7 @@ export class NimbleServer {
           );
         },
       }),
-      new ExtensionSyncHttp({
-        path: "/earthstar-api/v2",
-      }),
+      new ExtensionSyncWebsocket({}),
     ], opts);
   }
 

@@ -9,7 +9,7 @@ export class ReplicaServerCore {
 
   /**
    * Create a new replica server with an array of extensions.
-   * @param extensions - The extensions used by the replica server. Extensions will be registered in the order you provide them in, as one extension may depend on the actions of another. For example, the `ExtensionServeContent` may rely on a replica created by `ExtensionShareAllowListJson`.
+   * @param extensions - The extensions used by the replica server. Extensions will be registered in the order you provide them in, as one extension may depend on the actions of another. For example, the `ExtensionServeContent` may rely on a replica created by `ExtensionKnownShares`.
    */
   constructor(extensions: IReplicaServerExtension[]) {
     const peer = new Earthstar.Peer();
@@ -24,7 +24,7 @@ export class ReplicaServerCore {
   private async registerExtensions() {
     // Extensions must be registered sequentially, one-by-one,
     // As later extensions may depend on the actions of previous ones
-    // e.g. The serve content extension using a share added by the allow list extension
+    // e.g. The serve content extension using a share added by the known shares extension
     for (const extension of this.extensions) {
       await extension.register(this.peer);
     }
