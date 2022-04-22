@@ -32,8 +32,8 @@ const server = new ZippyServer();
 // That's it. Your replica server is running.
 ```
 
-If none of these configuration _quite_ meets your needs, it's easy to roll your
-own using extensions.
+If none of these configurations meets your needs, we've done our best to make it
+as straightforward to configure it to your liking using extensions.
 
 ## Extensions
 
@@ -51,7 +51,6 @@ import {
 } from "https://deno.land/xxxxxxx/mod.ts";
 
 const server = new ReplicaServer([
-  new ExtensionSyncWebsocket(),
   new ExtensionShareAllowListJson({
     allowList: "allow_list.json",
     onCreateReplica: (shareAddress) => {
@@ -62,8 +61,18 @@ const server = new ReplicaServer([
       );
     },
   }),
+  new ExtensionSyncWebsocket(),
 ]);
 ```
+
+The order in which you specify extensions matters, as some extensions may do
+something which another extension depends upon, e.g.
+`ExtensionShareAllowListJson` sets up replicas which `ExtensionServeContent`
+will serve content from.
+
+Equally, requests will fall through extensions, returning on the first match. So
+sync extensions like `ExtensionSyncHttp` should come before
+`ExtensionServeContent`, so that requests to sync aren't swallowed.
 
 ### ExtensionShareAllowListJson
 
@@ -97,6 +106,62 @@ from a replica, and serve it back in the response! It'll do the same with
 markdown, text, images, and more.
 
 ## Developing extensions
+
+Extensions can be very simple or complex. `ExtensionShareAllowListJson` is less
+than 50 lines of code.
+
+Your extension needs to implement the interface IReplicaServerExtension, which
+has two methods:
+
+- `register`: This will be called once when the replica server is initialised.
+  This is where your extension will get access to the replica server's `Peer`
+  instance.
+- `handler`: This is called whenever a request is made to the replica server,
+  and can be optionally handled by your extension if it does something with
+  server requests (e.g. syncing, serving web content). If it doesn't, you can
+  return `Promise<null>`, which will pass the request on to the next extension.
+
+You can use your extension's constructor as a place for configuring the
+extension before it's registered.
+
+Here's a simple extension which would display a message showing the number of
+shares when a user would make a request to `/share-count`:
+
+```ts
+class ShareCounterExtension implements IReplicaServerExtension {
+  private greeting: string;
+  private peer: Earthstar.Peer;
+
+  constructor(greeting: string) {
+    // Set the user's greeting to a private variable.
+    this.greeting = greeting;
+  }
+
+  register(peer: Earthstar.Peer) {
+    // Set the replica server's peer to a private variable.
+    this.peer = peer;
+
+    // We could also do other stuff here, like start a new process in the background.
+  }
+
+  request(req: Request) {
+    const url = new URL(req.url);
+
+    // Check if the request is for `/share-count`
+    if (url.pathname === "/share-count") {
+      const shareCount = this.peer.replicas.length;
+
+      // Serve up the greeting along with the number of shares on the replica server.
+      return new Response(
+        `${this.greeting}. This replica server is serving ${shareCount} shares!`,
+      );
+    }
+
+    // Or pass the request on to the next extension.
+    return Promise.resolve<null>;
+  }
+}
+```
 
 ## Deploying
 
