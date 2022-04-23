@@ -33,12 +33,24 @@ export class ExtensionSyncHttp implements IReplicaServerExtension {
     return Promise.resolve();
   }
 
-  handler(req: Request): Promise<Response | null> {
+  async handler(req: Request): Promise<Response | null> {
     const pathname = new URL(req.url).pathname;
 
     if (this.syncer && pathname.startsWith(this.path)) {
       // Typecasting is because of earthstar-streaming-rpc and node-fetch type discrepancies.
-      return this.syncer.transport.handler(req) as Promise<Response>;
+      const response = await this.syncer.transport.handler(req) as Response;
+
+      response.headers.append(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Access-Control-Allow-Headers",
+      );
+
+      response.headers.append(
+        "Access-Control-Allow-Origin",
+        "*",
+      );
+
+      return response;
     }
 
     return Promise.resolve(null);
