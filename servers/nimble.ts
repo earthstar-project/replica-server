@@ -11,7 +11,7 @@ import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/re
  * - It will look for the known shares list at `./known_shares.json`
  * - Websocket sync endpoint is at `<hostname>/earthstar-api/v2`
  */
-export class ZippyServer {
+export class NimbleServer {
   private server: ReplicaServer;
 
   constructor(opts: ReplicaServerOpts) {

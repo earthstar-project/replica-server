@@ -11,7 +11,21 @@ This module offers a selection of pre-configured replica servers, as well as a
 framework for constructing your own using a variety of extensions. You can even
 create your own extensions!
 
-# Preconfigured servers
+## Templates
+
+There are a few templates we've made to make it easy to deploy your own replica
+server, with detailed instructions:
+
+- [Glitch Replica Server](https://github.com/earthstar-project/replica-server-glitch) -
+  A replica server you can deploy in a few clicks.
+- [Glitch Showcase Replica Server](https://github.com/earthstar-project/showcase-replica-server-glitch) -
+  A replica server which has been configured to serve the contents of one share
+  over the web.
+- [Fly.io Replica Server](https://github.com/earthstar-project/replica-server-fly) -
+  Deploy a swarm of configurable replica servers, optionally serving content
+  from a share.
+
+## Preconfigured servers
 
 This module exports a few preconfigured servers you can deploy right away.
 
@@ -160,9 +174,3 @@ class ShareCounterExtension implements IReplicaServerExtension {
   }
 }
 ```
-
-## Deploying
-
-- Remix with Glitch
-- Instructions for Fly + Dockerfile
-- Running off your own machine
