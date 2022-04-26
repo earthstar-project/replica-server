@@ -25,6 +25,24 @@ server, with detailed instructions:
   Deploy a swarm of configurable replica servers, optionally serving content
   from a share.
 
+## Installation
+
+For Deno:
+
+```ts
+import { ReplicaServer } from "https://deno.land/x/earthstar_replica_server/mod.ts";
+```
+
+For NPM:
+
+```
+npm install @earthstar-project/replica-server
+```
+
+```ts
+import { ReplicaServer } from "@earthstar-project/replica-server";
+```
+
 ## Preconfigured servers
 
 This module exports a few preconfigured servers you can deploy right away.
@@ -39,7 +57,7 @@ This module exports a few preconfigured servers you can deploy right away.
 Here's an example of starting one of these on Deno:
 
 ```ts
-import { Nimble } from "https://deno.land/xxxxxxxxx/mod.ts";
+import { Nimble } from "https://deno.land/x/earthstar_replica_server/mod.ts";
 
 const server = new NimbleServer();
 // That's it. Your replica server is running.
