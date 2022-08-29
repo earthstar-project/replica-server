@@ -1,12 +1,11 @@
 import {
   ExtensionKnownShares,
   ExtensionSyncClassic,
-  ExtensionSyncWebsocket,
+  ExtensionSyncWeb,
   ReplicaServer,
   ReplicaServerOpts,
 } from "../mod.ts";
 import { Earthstar } from "../deps.ts";
-import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/replica/replica-driver-sqlite.deno.ts";
 
 /** A ready-made replica server populated with shares from a local list, able to synchronise with both classic (<v7) peers via HTTP as well as newer peers using websockets.
  * - It will look for the known shares list at `./known_shares.json`
@@ -23,17 +22,22 @@ export class HeritageServer {
           knownSharesPath: "./known_shares.json",
           onCreateReplica: (shareAddress) => {
             return new Earthstar.Replica(
-              shareAddress,
-              Earthstar.FormatValidatorEs4,
-              new ReplicaDriverSqlite({
-                share: shareAddress,
-                filename: `./data/${shareAddress}.sql`,
-                mode: "create-or-open",
-              }),
+              {
+                driver: {
+                  docDriver: new Earthstar.DocDriverSqlite({
+                    share: shareAddress,
+                    filename: `./data/${shareAddress}.sql`,
+                    mode: "create-or-open",
+                  }),
+                  attachmentDriver: new Earthstar.AttachmentDriverFilesystem(
+                    `./data/${shareAddress}_attachments`,
+                  ),
+                },
+              },
             );
           },
         }),
-        new ExtensionSyncWebsocket({
+        new ExtensionSyncWeb({
           path: "/earthstar-api/v2",
         }),
         new ExtensionSyncClassic({

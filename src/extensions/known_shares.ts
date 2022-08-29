@@ -7,7 +7,7 @@ import { IReplicaServerExtension } from "./extension.ts";
  */
 interface ExtensionKnownSharesOpts {
   knownSharesPath: string;
-  onCreateReplica: (shareAddress: string) => Earthstar.IReplica;
+  onCreateReplica: (shareAddress: string) => Earthstar.Replica;
 }
 
 /** An extension for populating a replica server with known shares. Use this to specify which shares you'd like your replica server to sync with others.
@@ -17,7 +17,7 @@ interface ExtensionKnownSharesOpts {
 export class ExtensionKnownShares implements IReplicaServerExtension {
   private peer: Earthstar.Peer | null = null;
   private knownSharesPath: string;
-  private onCreateReplica: (shareAddress: string) => Earthstar.IReplica;
+  private onCreateReplica: (shareAddress: string) => Earthstar.Replica;
 
   constructor(opts: ExtensionKnownSharesOpts) {
     this.knownSharesPath = opts.knownSharesPath;

@@ -119,7 +119,7 @@ export class ExtensionSyncClassic implements IReplicaServerExtension {
 
       let numIngested = 0;
       for (const doc of incomingDocs) {
-        const ingestRes = await replica.ingest(doc);
+        const ingestRes = await replica.ingest(Earthstar.FormatEs4, doc);
 
         if (!Earthstar.isErr(ingestRes)) {
           numIngested += 1;

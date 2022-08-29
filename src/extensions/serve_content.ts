@@ -1,7 +1,5 @@
 import { Earthstar } from "../../deps.ts";
 import { IReplicaServerExtension } from "./extension.ts";
-import { decode } from "https://deno.land/std@0.126.0/encoding/base64.ts";
-import { micromark } from "https://esm.sh/micromark@3.0.10";
 
 /**
  * - `sourceShare`: The share to use as the source of documents. Must have been created by another extension.
@@ -20,7 +18,7 @@ export interface ExtensionServeContentOpts {
 export class ExtensionServeContent implements IReplicaServerExtension {
   private peer: Earthstar.Peer | null = null;
   private path = "/";
-  private replica: Earthstar.IReplica | null = null;
+  private replica: Earthstar.Replica | null = null;
   private sourceShare: string;
   private indexPath: string | undefined;
   private allowedOrigins: string[] = [];
@@ -70,8 +68,25 @@ export class ExtensionServeContent implements IReplicaServerExtension {
         const doc = await this.replica.getLatestDocAtPath(this.indexPath);
 
         if (doc) {
+          const attachment = await this.replica.getAttachment(doc);
+
+          if (attachment && !Earthstar.isErr(attachment)) {
+            return new Response(
+              await attachment.stream(),
+              {
+                headers: {
+                  status: "200",
+                  "content-type": getContentType(doc.path),
+                  "access-control-allow-origin": `localhost ${
+                    this.allowedOrigins.join(", ")
+                  }`,
+                },
+              },
+            );
+          }
+
           return new Response(
-            contentToUInt8Array(doc.path, doc.content),
+            doc.text,
             {
               headers: {
                 status: "200",
@@ -97,8 +112,40 @@ export class ExtensionServeContent implements IReplicaServerExtension {
         });
       }
 
+      const attachment = await this.replica.getAttachment(maybeDocument);
+
+      if (attachment && !Earthstar.isErr(attachment)) {
+        return new Response(
+          await attachment.stream(),
+          {
+            headers: {
+              status: "200",
+              "content-type": getContentType(maybeDocument.path),
+              "access-control-allow-origin": `localhost ${
+                this.allowedOrigins.join(", ")
+              }`,
+            },
+          },
+        );
+      }
+
+      if (attachment === undefined) {
+        return new Response(
+          `Not found: ${maybeDocument.text}`,
+          {
+            headers: {
+              status: "404",
+              "content-type": getContentType(maybeDocument.path),
+              "access-control-allow-origin": `localhost ${
+                this.allowedOrigins.join(", ")
+              }`,
+            },
+          },
+        );
+      }
+
       return new Response(
-        contentToUInt8Array(maybeDocument.path, maybeDocument.content),
+        maybeDocument.text,
         {
           headers: {
             status: "200",
@@ -113,24 +160,6 @@ export class ExtensionServeContent implements IReplicaServerExtension {
 
     return Promise.resolve(null);
   }
-}
-
-const textEncoder = new TextEncoder();
-
-const base64Extensions = ["jpg", "jpeg", "png", "gif", "svg"];
-
-function contentToUInt8Array(path: string, content: string) {
-  const extension = path.split(".").pop();
-
-  if (extension === "md") {
-    return textEncoder.encode(micromark(content));
-  }
-
-  if (extension && base64Extensions.includes(extension)) {
-    return decode(content);
-  }
-
-  return textEncoder.encode(content);
 }
 
 function getContentType(path: string): string {

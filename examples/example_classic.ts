@@ -1,6 +1,7 @@
 import { Earthstar } from "../deps.ts";
+import * as EarthstarClassic from "https://esm.sh/earthstar?dts";
+import { HeritageServer } from "../servers/heritage.ts";
 import sharesList from "../known_shares.json" assert { type: "json" };
-import { NimbleServer } from "../mod.ts";
 
 const keypairA = await Earthstar.Crypto.generateAuthorKeypair(
   "suzy",
@@ -13,8 +14,7 @@ const keypairB = await Earthstar.Crypto.generateAuthorKeypair(
 const peer = new Earthstar.Peer();
 const peer2 = new Earthstar.Peer();
 
-const bytes = new TextEncoder().encode("yooo!");
-
+console.group("Setting up peers...");
 for (const knownShare of sharesList) {
   console.group(`Setting up ${knownShare}...`);
 
@@ -31,22 +31,15 @@ for (const knownShare of sharesList) {
 
   console.log(`Added to local peers.`);
 
-  await storage.set(keypairA, {
+  storage.set(keypairA, {
     text: "From New Storage 1!",
-    path: "/new/1",
+
+    path: "/new/1.txt",
   });
 
-  const attachDoc = await storage.set(keypairA, {
-    text: "From New Storage 1!",
-    path: "/new/one.txt",
-    attachment: bytes,
-  });
-
-  console.log(attachDoc);
-
-  await storage2.set(keypairB, {
+  storage2.set(keypairB, {
     text: "From New Storage 2!",
-    path: "/new/2",
+    path: "/new/2.txt",
   });
 
   console.log(`Added some sample docs.`);
@@ -54,12 +47,12 @@ for (const knownShare of sharesList) {
   const qs1 = storage.getQueryStream({
     historyMode: "all",
     orderBy: "localIndex ASC",
-  }, "everything");
+  });
 
   const qs2 = storage.getQueryStream({
     historyMode: "all",
     orderBy: "localIndex ASC",
-  }, "everything");
+  });
 
   const logWritable1 = new WritableStream<
     Earthstar.QuerySourceEvent<Earthstar.DocEs5>
@@ -96,9 +89,65 @@ for (const knownShare of sharesList) {
 }
 console.groupEnd();
 
+//
+
+console.group("Setting up classic storages...");
+const classicStorages: EarthstarClassic.StorageMemory[] = [];
+for (const knownShare of sharesList) {
+  console.group(`Setting up ${knownShare}...`);
+  const storage = new EarthstarClassic.StorageMemory([
+    EarthstarClassic.ValidatorEs4,
+  ], knownShare);
+  const storage2 = new EarthstarClassic.StorageMemory([
+    EarthstarClassic.ValidatorEs4,
+  ], knownShare);
+
+  storage.set(keypairA, {
+    content: "From classic storage 1!",
+    format: "es.4",
+    path: "/classic/1.txt",
+  });
+
+  storage2.set(keypairB, {
+    content: "From classic storage 2!",
+    format: "es.4",
+    path: "/classic/2.txt",
+  });
+
+  console.log(`Added some sample docs.`);
+
+  classicStorages.push(storage, storage2);
+
+  storage.onWrite.subscribe((event) => {
+    if (event.kind === "DOCUMENT_WRITE") {
+      console.group(`%c${knownShare} (Classic) got doc:`, "color: purple");
+      console.log(event.document.path);
+      console.log(event.document.content);
+      console.groupEnd();
+    }
+  });
+
+  storage2.onWrite.subscribe((event) => {
+    if (event.kind === "DOCUMENT_WRITE") {
+      console.group(
+        `%c${knownShare} 2 (Classic) got doc:`,
+        "color: purple",
+      );
+      console.log(event.document.path);
+      console.log(event.document.content);
+      console.groupEnd();
+    }
+  });
+
+  console.log(`Subscribed to storage events.`);
+
+  console.groupEnd();
+}
+console.groupEnd();
+
 // Let's sync!
 
-//const server = new NimbleServer({ port: 9091 });
+const server = new HeritageServer({ port: 9091 });
 
 console.log(`%cStarted server.`, "color: green");
 
@@ -106,6 +155,15 @@ peer.sync("ws://localhost:9091");
 peer2.sync("ws://localhost:9091");
 
 console.log("%cBegan syncing peers...", "color: green");
+
+for (const storage of classicStorages) {
+  const syncer = new EarthstarClassic.Syncer1(storage);
+  syncer.addPub("http://localhost:9091");
+
+  setInterval(() => syncer.sync(), 1000);
+}
+
+console.log("%cBegan syncing classic peers...", "color: green");
 
 const replicas = peer.replicas();
 
@@ -116,11 +174,11 @@ await new Promise((resolve) => {
 for (const replica of replicas) {
   await replica.set(keypairA, {
     text: "Test",
-    path: "/after",
+    path: "/after.txt",
   });
 }
 
-async function checkAllAreSynced() {
+function checkAllAreSynced() {
   const allStoragesSynced = peer.replicas().every(async (storage) => {
     const docs = await storage.getLatestDocs();
     return docs.length === 5;
@@ -131,12 +189,12 @@ async function checkAllAreSynced() {
     return docs.length === 5;
   });
 
-  if (allStoragesSynced && allStoragesSynced2) {
+  const allClassicStoragesSynced = classicStorages.every((storage) => {
+    return storage.documents().length === 5;
+  });
+
+  if (allStoragesSynced && allStoragesSynced2 && allClassicStoragesSynced) {
     console.log("%cEverything was synced up!", "background-color: green");
-
-    await Deno.remove("./data", { recursive: true });
-    await Deno.mkdir("./data");
-
     Deno.exit(0);
   } else {
     console.group(
@@ -146,6 +204,7 @@ async function checkAllAreSynced() {
     console.log({
       allStoragesSynced,
       allStoragesSynced2,
+      allClassicStoragesSynced,
     });
     console.groupEnd();
   }
