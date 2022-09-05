@@ -59,7 +59,8 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
 
       const { socket, response } = Deno.upgradeWebSocket(req);
 
-      await syncer.handleTransferRequest({
+      //  We don't await this, as we need to return the response.
+      syncer.handleTransferRequest({
         shareAddress,
         formatName,
         path: `/${path}`,
@@ -95,7 +96,7 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
 
       console.log(`Syncer ${newSyncer.id}: started`);
 
-      newSyncer.isDone.then(() => {
+      newSyncer.isDone().then(() => {
         console.log(`Syncer ${newSyncer.id}: completed`);
       }).catch((err) => {
         console.error(console.log(`Syncer ${newSyncer.id}: cancelled`), err);
