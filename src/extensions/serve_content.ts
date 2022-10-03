@@ -131,7 +131,7 @@ export class ExtensionServeContent implements IReplicaServerExtension {
 
       if (attachment === undefined) {
         return new Response(
-          `Not found: ${maybeDocument.text}`,
+          `Not found: ${maybeDocument.text}, ${maybeDocument.attachmentSize}`,
           {
             headers: {
               status: "404",
