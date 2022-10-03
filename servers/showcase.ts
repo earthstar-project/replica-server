@@ -7,7 +7,7 @@ import {
   ReplicaServerOpts,
 } from "../mod.ts";
 import { Earthstar } from "../deps.ts";
-import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.2/src/replica/replica-driver-sqlite.deno.ts";
+import { ReplicaDriverSqlite } from "https://deno.land/x/earthstar@v9.3.3/src/replica/replica-driver-sqlite.deno.ts";
 
 /** A ready-made replica server populated with shares from a local list, able to serve the contents of a single share via HTTP requests. Great for building wikis, websites, and image galleries with friends.
  * - It will look for the known shares list at `./known_shares.json`

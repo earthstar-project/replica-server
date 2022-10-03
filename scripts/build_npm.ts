@@ -58,15 +58,15 @@ await build({
       name: "earthstar-streaming-rpc",
       version: "5.0.1",
     },
-    "https://deno.land/x/earthstar@v9.3.2/mod.ts": {
+    "https://deno.land/x/earthstar@v9.3.3/mod.ts": {
       name: "earthstar",
-      version: "9.3.2",
+      version: "9.3.3",
     },
-    "https://deno.land/x/earthstar@v9.3.2/src/replica/replica-driver-sqlite.deno.ts":
+    "https://deno.land/x/earthstar@v9.3.3/src/replica/replica-driver-sqlite.deno.ts":
       {
         name: "earthstar",
         subPath: "node",
-        version: "9.3.2",
+        version: "9.3.3",
       },
     "https://esm.sh/micromark@3.0.10": {
       name: "micromark",
