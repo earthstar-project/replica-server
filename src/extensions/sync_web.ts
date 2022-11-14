@@ -77,8 +77,6 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
     if (initiateMatch) {
       const { socket, response } = Deno.upgradeWebSocket(req, {});
 
-      const partner = new Earthstar.PartnerWebServer({ socket });
-
       const peer = await this.peer;
 
       const { mode } = initiateMatch.pathname.groups;
@@ -87,12 +85,12 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
         return Promise.resolve(null);
       }
 
-      const newSyncer = new Earthstar.Syncer({
-        partner,
-        mode,
-        peer,
-        formats: this.formats,
+      const partner = new Earthstar.PartnerWebServer({
+        socket,
+        appetite: mode === "once" ? "once" : "continuous",
       });
+
+      const newSyncer = peer.addSyncPartner(partner, this.formats);
 
       console.log(`Syncer ${newSyncer.id}: started`);
 
