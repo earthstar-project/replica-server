@@ -33,6 +33,7 @@ export class ExtensionKnownShares implements IReplicaServerExtension {
 
     for (const shareAddress of knownShares) {
       const replica = this.onCreateReplica(shareAddress);
+
       await this.peer.addReplica(replica);
     }
   }
