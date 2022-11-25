@@ -5,6 +5,7 @@ import {
   ReplicaServerOpts,
 } from "../mod.ts";
 import { Earthstar } from "../deps.ts";
+import { ExtensionServerSettings } from "../src/extensions/server_settings.ts";
 
 /** A ready-made replica server populated with shares from a local list, and Websocket syncing.
  * - It will look for the known shares list at `./known_shares.json`
@@ -15,8 +16,9 @@ export class NimbleServer {
 
   constructor(opts: ReplicaServerOpts) {
     this.server = new ReplicaServer([
-      new ExtensionKnownShares({
-        knownSharesPath: "./known_shares.json",
+      new ExtensionServerSettings({
+        configurationShare:
+          "+apples.btqswluholq6on2ci5mck66uzkmumb5uszgvqimtshff2f6zy5etq",
         onCreateReplica: (shareAddress) => {
           return new Earthstar.Replica(
             {

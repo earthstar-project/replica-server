@@ -1,6 +1,5 @@
 import { Earthstar } from "../../deps.ts";
 import { IReplicaServerExtension } from "./extension.ts";
-import { ServerSettings } from "../../../earthstar_layers/mod.ts";
 
 interface ExtensionServerSettingsOpts {
   configurationShare: Earthstar.ShareAddress;
@@ -9,46 +8,115 @@ interface ExtensionServerSettingsOpts {
   ) => Earthstar.MultiformatReplica;
 }
 
+const HOSTED_SHARE_TEMPLATE =
+  `/server-settings/1.*/shares/{shareAddress}/{hostType}`;
+
 export class ExtensionServerSettings implements IReplicaServerExtension {
   private configReplica: Earthstar.MultiformatReplica;
   private onCreateReplica: (
     configurationShareAddress: string,
-  ) => Earthstar.MultiformatReplica;
+  ) => Earthstar.Replica;
 
   constructor(opts: ExtensionServerSettingsOpts) {
     this.configReplica = opts.onCreateReplica(opts.configurationShare);
     this.onCreateReplica = opts.onCreateReplica;
   }
 
-  async register(peer: Earthstar.Peer): Promise<void> {
+  register(peer: Earthstar.Peer): Promise<void> {
     peer.addReplica(this.configReplica);
 
-    // Get shares configured by settings.
-    const hostedShares = await ServerSettings.getHostedShares(
-      this.configReplica,
+    const onCreateReplica = this.onCreateReplica;
+
+    const { glob } = Earthstar.parseTemplate(HOSTED_SHARE_TEMPLATE);
+    const { query, regex } = Earthstar.globToQueryAndRegex(glob);
+
+    const configShareAddress = this.configReplica.share
+
+    this.configReplica.getQueryStream(query, "everything").pipeTo(
+      new WritableStream({
+        async write(event) {
+          if (event.kind === "existing" || event.kind === "success") {
+            
+            
+            if (
+              regex != null &&
+              new RegExp(regex).test(event.doc.path)
+            ) {
+              const pathVariables = Earthstar.extractTemplateVariablesFromPath(
+                HOSTED_SHARE_TEMPLATE,
+                event.doc.path,
+              );
+
+              if (!pathVariables) {
+                return;
+              }
+
+              const shareAddress = pathVariables["shareAddress"];
+              
+              if (shareAddress === configShareAddress) {
+                return
+              }
+
+              if (event.doc.text.length > 0) {
+                // Add
+                
+                
+                const replica = onCreateReplica(shareAddress);
+
+
+                peer.addReplica(replica);
+
+                console.log("Server settings:", `now hosting ${replica.share}`);
+              } else {
+                // Remove
+                const replicaToClose = peer.getReplica(shareAddress);
+
+                if (replicaToClose) {
+                  await replicaToClose.close(true);
+                  peer.removeReplica(replicaToClose);
+                  console.log(
+                    "Server settings:",
+                    `stopped hosting ${replicaToClose.share}`,
+                  );
+                }
+              }
+            }
+          }
+
+          if (event.kind === "expire") {
+            if (
+              regex != null &&
+              new RegExp(regex).test(event.doc.path)
+            ) {
+              // Remove
+              const pathVariables = Earthstar.extractTemplateVariablesFromPath(
+                HOSTED_SHARE_TEMPLATE,
+                event.doc.path,
+              );
+
+              if (!pathVariables) {
+                return;
+              }
+
+              const shareAddress = pathVariables["shareAddress"];
+
+              const replicaToClose = peer.getReplica(shareAddress);
+
+              if (replicaToClose) {
+                await replicaToClose.close(true);
+                peer.removeReplica(replicaToClose);
+                console.log(
+                  "Server settings:",
+                  `stopped hosting ${replicaToClose.share}`,
+                );
+              }
+            }
+          }
+        },
+      }),
     );
 
-    // Add them to the server peer.
-    for (const share of hostedShares) {
-      const replica = this.onCreateReplica(share);
-      peer.addReplica(replica);
-    }
-
-    // Listen for expiring documents and remove them.
-    this.configReplica.onEvent((event) => {
-      if (event.kind === "expire") {
-        // Check if it's a hosted share doc.
-        const variables = Earthstar.extractTemplateVariablesFromPath(
-          ServerSettings.TEMPORARY_HOSTED_SHARE_TEMPLATE,
-          event.doc.path,
-        );
-
-        if (variables && variables["shareName"]) {
-          // If so, remove from the server peer.
-          peer.removeReplicaByShare(variables["shareName"]);
-        }
-      }
-    });
+    return Promise.resolve();
   }
 
   handler(_req: Request): Promise<Response | null> {

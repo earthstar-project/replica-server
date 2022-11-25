@@ -74,8 +74,6 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
 
     const initiateMatch = initiatePattern.exec(req.url);
 
-    console.log(req.url);
-
     if (initiateMatch) {
       const { socket, response } = Deno.upgradeWebSocket(req, {});
 
@@ -83,7 +81,7 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
 
       const { mode } = initiateMatch.pathname.groups;
 
-      if (mode !== "once" && mode !== "live") {
+      if (mode !== "once" && mode !== "continuous") {
         return Promise.resolve(null);
       }
 
@@ -92,19 +90,18 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
         appetite: mode === "once" ? "once" : "continuous",
       });
 
-      const newSyncer = peer.addSyncPartner(partner, this.formats);
+      const description = `Client ${Earthstar.randomId()}`;
 
-      console.log(`Syncer ${newSyncer.id}: started`);
+      const newSyncer = peer.addSyncPartner(partner, description, this.formats);
 
-      newSyncer.onStatusChange((status) => {
-        console.log(status);
-      });
+      console.log(`${description}: started sync`);
 
       newSyncer.isDone().then(() => {
-        console.log(`Syncer ${newSyncer.id}: completed`);
+        console.log(`${description}: completed sync`);
       }).catch((err) => {
-        console.error(console.log(`Syncer ${newSyncer.id}: cancelled`), err);
+        console.error(`Syncer ${newSyncer.id}: cancelled`, err);
       }).finally(() => {
+        console.log(`${description}: removed`);
         this.syncers.delete(newSyncer.id);
       });
 
