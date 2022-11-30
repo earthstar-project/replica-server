@@ -9,7 +9,7 @@ interface ExtensionServerSettingsOpts {
 }
 
 const HOSTED_SHARE_TEMPLATE =
-  `/server-settings/1.*/shares/{shareAddress}/{hostType}`;
+  `/server-settings/1.*/shares/{shareHash}/{hostType}`;
 
 export class ExtensionServerSettings implements IReplicaServerExtension {
   private configReplica: Earthstar.MultiformatReplica;
@@ -30,14 +30,12 @@ export class ExtensionServerSettings implements IReplicaServerExtension {
     const { glob } = Earthstar.parseTemplate(HOSTED_SHARE_TEMPLATE);
     const { query, regex } = Earthstar.globToQueryAndRegex(glob);
 
-    const configShareAddress = this.configReplica.share
+    const configShareAddress = this.configReplica.share;
 
     this.configReplica.getQueryStream(query, "everything").pipeTo(
       new WritableStream({
         async write(event) {
           if (event.kind === "existing" || event.kind === "success") {
-            
-            
             if (
               regex != null &&
               new RegExp(regex).test(event.doc.path)
@@ -51,25 +49,39 @@ export class ExtensionServerSettings implements IReplicaServerExtension {
                 return;
               }
 
-              const shareAddress = pathVariables["shareAddress"];
-              
-              if (shareAddress === configShareAddress) {
-                return
+              const shareHash = pathVariables["shareHash"];
+
+              const configHash = await Earthstar.Crypto.sha256base32(
+                configShareAddress,
+              );
+
+              if (shareHash === configHash) {
+                return;
               }
 
-              if (event.doc.text.length > 0) {
+              if (
+                event.doc.text.length > 0 &&
+                Earthstar.notErr(Earthstar.parseShareAddress(event.doc.text)) &&
+                !peer.hasShare(event.doc.text)
+              ) {
                 // Add
-                
-                
-                const replica = onCreateReplica(shareAddress);
-
+                const replica = onCreateReplica(event.doc.text);
 
                 peer.addReplica(replica);
 
                 console.log("Server settings:", `now hosting ${replica.share}`);
-              } else {
-                // Remove
-                const replicaToClose = peer.getReplica(shareAddress);
+              } else if (event.doc.text.length === 0) {
+                let replicaToClose;
+
+                for (const replica of peer.replicas()) {
+                  const rShareHash = await Earthstar.Crypto.sha256base32(
+                    replica.share,
+                  );
+
+                  if (rShareHash === shareHash) {
+                    replicaToClose = replica;
+                  }
+                }
 
                 if (replicaToClose) {
                   await replicaToClose.close(true);
