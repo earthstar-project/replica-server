@@ -75,15 +75,15 @@ export class ExtensionSyncWeb<F> implements IReplicaServerExtension {
     const initiateMatch = initiatePattern.exec(req.url);
 
     if (initiateMatch) {
-      const { socket, response } = Deno.upgradeWebSocket(req, {});
-
-      const peer = await this.peer;
-
       const { mode } = initiateMatch.pathname.groups;
 
       if (mode !== "once" && mode !== "continuous") {
         return Promise.resolve(null);
       }
+
+      const { socket, response } = Deno.upgradeWebSocket(req, {});
+
+      const peer = await this.peer;
 
       const partner = new Earthstar.PartnerWebClient({
         socket,
