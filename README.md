@@ -1,5 +1,7 @@
 # Earthstar Replica Server
 
+> ### 🚨🚨🚨 Server functionality has been moved into the core Earthstar module! This repo will no longer receive any updates.
+
 A replica server is an always-online peer which you can use to synchronise your
 Earthstar shares with far away friends. They're undiscoverable and only
 synchronise with peers who already know your shares' addresses.
